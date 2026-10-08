@@ -15,22 +15,23 @@ rocminfo | grep -i gfx      # your card's gfx target, e.g. gfx1100
 - The 2024 announcement listed RX 7900 XTX/XT/GRE, 7800 XT, 7700 XT, 7600 XT/7600, 6950 XT, 6900 XT, 6800 XT/6800 and Vega 64/56. Newer cards may have been added since. Check the current docs for yours.
 - Your user needs access to the GPU devices: `sudo usermod -aG render,video $USER`, then log out and back in.
 
-### Your card: Radeon RX 7700 XT
+### Your hardware
 
-- **Support:** the RX 7700 XT was on Ollama's official ROCm list in the 2024 announcement, so it should work without overrides. Its gfx target should be `gfx1101` (confirm with `rocminfo`). Don't set `HSA_OVERRIDE_GFX_VERSION` unless detection fails.
-- **VRAM:** 12 GB. Plan for 7B-14B quantized models. Larger models spill to system RAM and slow down a lot.
-- **System RAM: 96 GB.** Ollama can split a model between GPU and system RAM, so you can run models far larger than 12 GB of VRAM. The catch is speed, which is limited by RAM bandwidth.
-  - **Fits fully in VRAM (fast):** 7B-14B quantized.
+Gigabyte Radeon RX 7800 XT Gaming OC (16 GB GDDR6), Ryzen 9 7950X3D, G.Skill Trident Z5 RGB 96 GB (2 x 48 GB) DDR5-6400 CL32.
+
+- **Support:** the RX 7800 XT was on Ollama's official ROCm list in the 2024 announcement, so it should work without overrides. Its gfx target should be `gfx1101` (confirm with `rocminfo`). Don't set `HSA_OVERRIDE_GFX_VERSION` unless detection fails.
+- **VRAM:** 16 GB. Plan for 7B-14B quantized models fully on the GPU, with some headroom for context. Larger models spill to system RAM and slow down.
+- **System RAM: 96 GB.** Ollama can split a model between GPU and system RAM, so you can run models far larger than 16 GB of VRAM. The catch is speed, which is limited by RAM bandwidth.
+  - **Fits fully in VRAM (fast):** 7B-14B quantized, and possibly some ~20B models.
   - **Partial offload (usable):** ~30B dense models run, at a few tokens per second.
   - **70B-class dense models** fit in 96 GB at 4-bit but will be slow, since most layers run on CPU.
   - **Mixture-of-experts (MoE) models** are the sweet spot. Only a fraction of the weights is active per token, so large MoE models run much faster than dense models of the same size. Examples to look for in the library: Qwen3 30B-A3B and gpt-oss. Check current names and sizes on ollama.com/library.
   - Keep the context length modest. A large context uses a lot of extra memory.
 - **CPU: Ryzen 9 7950X3D** (16 cores / 32 threads). Strong for the CPU side of offloading. Notes:
   - **RAM speed is the real limit** for offloaded layers, so enable the EXPO/XMP profile in BIOS. Check with `sudo dmidecode -t memory | grep -i speed`.
-  - **Your RAM is a 64 GB stick plus a 32 GB stick.** That's one stick per channel, so both channels are populated. Both are the same make and model, so they should run at the same rated speed and an EXPO profile should apply, but confirm it actually did. The remaining unknown is the unequal capacity: I'm not certain how AM5 interleaves a 64 GB and a 32 GB stick, so it may not get full dual-channel bandwidth across all 96 GB. Measure instead of assuming: run a model with `ollama run <model> --verbose` and read the `eval rate` (tokens/s), or test memory with `sysbench memory run`. Check what speed it actually runs at with `sudo dmidecode -t memory | grep -i "configured"`.
-  - **DDR5 on AM5 is dual-channel.** As a rough estimate, DDR5-6000 gives about 90 GB/s theoretical bandwidth, and offloaded tokens per second scale with that. 96 GB is most likely 2x48 GB, which runs at full speed. A 4-DIMM setup usually forces lower memory speeds on AM5, so if you have four sticks, expect slower offload. These figures are estimates, not benchmarks.
+  - **Your RAM is a matched 2 x 48 GB kit.** That's true dual channel. DDR5-6400 gives about 102 GB/s theoretical, so the rated bandwidth is good for offloading. In practice Ryzen 7000 often can't run 6400 with the memory controller at the full 1:1 ratio, so it may run at 6000 or drop to a slower controller mode. Confirm what it actually runs at, and that EXPO is enabled, with `sudo dmidecode -t memory | grep -i "configured"`. These figures are estimates, not benchmarks. Measure with `ollama run <model> --verbose` (read `eval rate`, tokens/s) on a model larger than 16 GB, or `sysbench memory run`.
   - **Threads:** Ollama picks a thread count automatically. If CPU-offloaded speed looks poor, try setting `num_thread` to 16 (physical cores) in a Modelfile or request. I haven't verified this helps on this chip.
-  - **Integrated GPU:** the 7950X3D has a small iGPU, so ROCm may see two GPUs. If Ollama picks the wrong one, pin the 7700 XT with `HIP_VISIBLE_DEVICES` (use the index shown by `rocminfo`). Add it in `sudo systemctl edit ollama` like the override in Troubleshooting.
+  - **Integrated GPU:** the 7950X3D has a small iGPU, so ROCm may see two GPUs. If Ollama picks the wrong one, pin the 7800 XT with `HIP_VISIBLE_DEVICES` (use the index shown by `rocminfo`). Add it in `sudo systemctl edit ollama` like the override in Troubleshooting.
   - **X3D scheduling:** only one of the two CCDs has the 3D V-Cache. Recent kernels include an AMD V-Cache preference setting (`amd_x3d_mode` in sysfs), which matters for games more than for LLM work. Leave the default unless you have a reason to change it.
 - **Check:** after your first run, `ollama ps` should show the model on GPU. If it shows CPU, go to Troubleshooting.
 
