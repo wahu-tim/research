@@ -15,6 +15,12 @@ rocminfo | grep -i gfx      # your card's gfx target, e.g. gfx1100
 - The 2024 announcement listed RX 7900 XTX/XT/GRE, 7800 XT, 7700 XT, 7600 XT/7600, 6950 XT, 6900 XT, 6800 XT/6800 and Vega 64/56. Newer cards may have been added since. Check the current docs for yours.
 - Your user needs access to the GPU devices: `sudo usermod -aG render,video $USER`, then log out and back in.
 
+### Your card: Radeon RX 7700 XT
+
+- **Support:** the RX 7700 XT was on Ollama's official ROCm list in the 2024 announcement, so it should work without overrides. Its gfx target should be `gfx1101` (confirm with `rocminfo`). Don't set `HSA_OVERRIDE_GFX_VERSION` unless detection fails.
+- **VRAM:** 12 GB. Plan for 7B-14B quantized models. Larger models spill to system RAM and slow down a lot.
+- **Check:** after your first run, `ollama ps` should show the model on GPU. If it shows CPU, go to Troubleshooting.
+
 ## 2. Install (native)
 
 ```bash
