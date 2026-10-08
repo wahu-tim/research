@@ -112,8 +112,43 @@ dnf search rocm
 sudo snapper -c root create -d "configured baseline"
 ```
 
+## 11. Advanced tweaks (optional)
+
+> Commands here are from general Fedora knowledge and were **not verified on Fedora 45**. Check package and option names first (Fedora 41+ uses dnf5).
+
+**Skip:** `mitigations=off`, disabling SELinux, custom kernels. They cost the hardening that makes Fedora a good research host, for little gain.
+
+**System**
+
+- [ ] Faster DNF: add `max_parallel_downloads=10` and `defaultyes=True` to `/etc/dnf/dnf.conf`
+- [ ] Firmware: `sudo fwupdmgr refresh && sudo fwupdmgr update`
+- [ ] AMD hardware video decode (RPM Fusion): `sudo dnf swap mesa-va-drivers mesa-va-drivers-freeworld --allowerasing`
+- [ ] Confirm defaults rather than tuning them: zram swap (`zramctl`), Btrfs zstd compression (`mount | grep btrfs`), weekly fstrim
+
+**Shell and dev quality of life**
+
+```bash
+sudo dnf install -y zsh fish tmux neovim ripgrep fd-find bat fzf git-delta
+```
+
+- [ ] Add `starship` (prompt), `direnv` + `mise` (per-project tool versions)
+- [ ] One Distrobox container per project
+
+**Security hardening**
+
+- [ ] USBGuard to authorize USB devices
+- [ ] Automatic security-only updates (dnf5 `automatic` equivalent; confirm package name)
+- [ ] TPM2 disk unlock: `systemd-cryptenroll` (keep your recovery passphrase)
+- [ ] DNS over TLS via systemd-resolved
+- [ ] OpenSCAP scan to see where you stand (one blog reports a stock Fedora 44 cloud image at ~75/100 on CIS Level 1 Server)
+- [ ] Limit Flatpak permissions with Flatseal
+- [ ] Skip fapolicyd on a research workstation; it can break tooling
+
 ## Sources
 
+- [ComputingForGeeks: Security hardening Fedora](https://computingforgeeks.com/security-hardening-fedora/)
+- [Fedora Discussion: Securing Fedora on a laptop](https://discussion.fedoraproject.org/t/securing-fedora-installation-on-my-laptop/196912)
+- [DebugPoint: Things to do after installing Fedora](https://www.debugpoint.com/10-things-to-do-fedora-37-after-install) (older, Fedora 37)
 - [Fedora Magazine: Announcing Fedora Linux 45 Beta](https://fedoramagazine.org/announcing-fedora-linux-45-beta/)
 - [Red Hat: Fedora 45 Beta now available](https://redhat.com/en/blog/fedora-45-beta-now-available)
 - [Phoronix: Ubuntu 26.10 Beta Released](https://www.phoronix.com/news/Ubuntu-26.10-Beta-Released)
