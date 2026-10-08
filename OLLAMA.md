@@ -19,6 +19,12 @@ rocminfo | grep -i gfx      # your card's gfx target, e.g. gfx1100
 
 - **Support:** the RX 7700 XT was on Ollama's official ROCm list in the 2024 announcement, so it should work without overrides. Its gfx target should be `gfx1101` (confirm with `rocminfo`). Don't set `HSA_OVERRIDE_GFX_VERSION` unless detection fails.
 - **VRAM:** 12 GB. Plan for 7B-14B quantized models. Larger models spill to system RAM and slow down a lot.
+- **System RAM: 96 GB.** Ollama can split a model between GPU and system RAM, so you can run models far larger than 12 GB of VRAM. The catch is speed, which is limited by RAM bandwidth.
+  - **Fits fully in VRAM (fast):** 7B-14B quantized.
+  - **Partial offload (usable):** ~30B dense models run, at a few tokens per second.
+  - **70B-class dense models** fit in 96 GB at 4-bit but will be slow, since most layers run on CPU.
+  - **Mixture-of-experts (MoE) models** are the sweet spot. Only a fraction of the weights is active per token, so large MoE models run much faster than dense models of the same size. Examples to look for in the library: Qwen3 30B-A3B and gpt-oss. Check current names and sizes on ollama.com/library.
+  - Keep the context length modest. A large context uses a lot of extra memory.
 - **Check:** after your first run, `ollama ps` should show the model on GPU. If it shows CPU, go to Troubleshooting.
 
 ## 2. Install (native)
