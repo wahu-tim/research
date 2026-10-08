@@ -25,6 +25,11 @@ rocminfo | grep -i gfx      # your card's gfx target, e.g. gfx1100
   - **70B-class dense models** fit in 96 GB at 4-bit but will be slow, since most layers run on CPU.
   - **Mixture-of-experts (MoE) models** are the sweet spot. Only a fraction of the weights is active per token, so large MoE models run much faster than dense models of the same size. Examples to look for in the library: Qwen3 30B-A3B and gpt-oss. Check current names and sizes on ollama.com/library.
   - Keep the context length modest. A large context uses a lot of extra memory.
+- **CPU: Ryzen 9 7950X3D** (16 cores / 32 threads). Strong for the CPU side of offloading. Notes:
+  - **RAM speed is the real limit** for offloaded layers, so enable the EXPO/XMP profile in BIOS. Check with `sudo dmidecode -t memory | grep -i speed`.
+  - **Threads:** Ollama picks a thread count automatically. If CPU-offloaded speed looks poor, try setting `num_thread` to 16 (physical cores) in a Modelfile or request. I haven't verified this helps on this chip.
+  - **Integrated GPU:** the 7950X3D has a small iGPU, so ROCm may see two GPUs. If Ollama picks the wrong one, pin the 7700 XT with `HIP_VISIBLE_DEVICES` (use the index shown by `rocminfo`). Add it in `sudo systemctl edit ollama` like the override in Troubleshooting.
+  - **X3D scheduling:** only one of the two CCDs has the 3D V-Cache. Recent kernels include an AMD V-Cache preference setting (`amd_x3d_mode` in sysfs), which matters for games more than for LLM work. Leave the default unless you have a reason to change it.
 - **Check:** after your first run, `ollama ps` should show the model on GPU. If it shows CPU, go to Troubleshooting.
 
 ## 2. Install (native)
