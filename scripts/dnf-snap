@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# dnf-snap - run dnf with a snapper pre/post snapshot pair around transactions.
+# Fallback if the dnf5 Actions rule from snapper-setup.sh doesn't work. See SNAPPER.md.
+# NOT tested on Fedora 45.
+#
+# Usage: dnf-snap upgrade        dnf-snap install foo        dnf-snap remove bar
+# Install: install -m 755 scripts/dnf-snap ~/.local/bin/dnf-snap
+# Optional: alias dnf='dnf-snap'   (read-only commands pass straight through)
+
+set -uo pipefail
+
+CONFIG="${SNAPPER_CONFIG:-root}"
+
+# Only wrap commands that change the system.
+case "${1:-}" in
+  install|remove|upgrade|update|distro-sync|downgrade|reinstall|autoremove|swap|group|system-upgrade|offline)
+    ;;
+  *)
+    exec sudo dnf "$@"
+    ;;
+esac
+
+# 'group list/info' are read-only.
+if [[ "${1:-}" == "group" && ( "${2:-}" == "list" || "${2:-}" == "info" ) ]]; then
+  exec sudo dnf "$@"
+fi
+
+desc="dnf $*"
+pre="$(sudo snapper -c "$CONFIG" create -t pre -c number -p -d "$desc")" \
+  || { echo "snapper pre snapshot failed; not running dnf." >&2; exit 1; }
+echo "[dnf-snap] pre snapshot #$pre"
+
+sudo dnf "$@"
+rc=$?
+
+if post="$(sudo snapper -c "$CONFIG" create -t post -c number --pre-number "$pre" -p -d "$desc")"; then
+  echo "[dnf-snap] post snapshot #$post"
+else
+  echo "[dnf-snap] WARNING: post snapshot failed (pre #$pre remains)." >&2
+fi
+
+exit $rc

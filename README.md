@@ -10,13 +10,14 @@ A set of guides and scripts for a single-OS, bare-metal Fedora 45 install used f
 |---|---|---|---|
 | 1 | Install and base setup | [SETUP.md](SETUP.md) | [`scripts/post-install.sh`](scripts/post-install.sh) |
 | 2 | Install your apps (terminal, VS Code, VMware, Cider...) | [SOFTWARE.md](SOFTWARE.md) | |
-| 3 | Back it up before you tinker | [BACKUP.md](BACKUP.md) | [`scripts/restic-backup.sh`](scripts/restic-backup.sh) |
-| 4 | Harden it | [HARDENING.md](HARDENING.md) | [`scripts/audit.sh`](scripts/audit.sh) (read-only) |
-| 5 | Build the research lab | [LAB.md](LAB.md) | [`scripts/build-lab.sh`](scripts/build-lab.sh) |
-| 6 | Reverse engineering tools | [REVERSE-ENGINEERING.md](REVERSE-ENGINEERING.md) | |
-| 7 | Fake internet and traffic analysis | [NETWORK-ANALYSIS.md](NETWORK-ANALYSIS.md) | |
-| 8 | Local LLMs on the AMD GPU | [OLLAMA.md](OLLAMA.md) | |
-| 9 | Ideas, tweaks, COPR explainer | [EXTRAS.md](EXTRAS.md) | |
+| 3 | Automatic Btrfs snapshots (openSUSE-style) | [SNAPPER.md](SNAPPER.md) | [`scripts/snapper-setup.sh`](scripts/snapper-setup.sh), [`scripts/dnf-snap`](scripts/dnf-snap) |
+| 4 | Back it up before you tinker | [BACKUP.md](BACKUP.md) | [`scripts/restic-backup.sh`](scripts/restic-backup.sh) |
+| 5 | Harden it | [HARDENING.md](HARDENING.md) | [`scripts/audit.sh`](scripts/audit.sh) (read-only) |
+| 6 | Build the research lab | [LAB.md](LAB.md) | [`scripts/build-lab.sh`](scripts/build-lab.sh) |
+| 7 | Reverse engineering tools | [REVERSE-ENGINEERING.md](REVERSE-ENGINEERING.md) | |
+| 8 | Fake internet and traffic analysis | [NETWORK-ANALYSIS.md](NETWORK-ANALYSIS.md) | |
+| 9 | Local LLMs on the AMD GPU | [OLLAMA.md](OLLAMA.md) | |
+| 10 | Ideas, tweaks, COPR explainer | [EXTRAS.md](EXTRAS.md) | |
 
 ## Quick path
 
