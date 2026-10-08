@@ -58,6 +58,58 @@ Things that commonly go wrong on Fedora:
 3. **New kernel not supported.** Fedora moves fast, and VMware may lag. Community-patched host modules exist (for example `gleb-kun/vmware-host-modules`), but they are not VMware-supported. Review the code before building them, especially with Secure Boot enabled.
 4. **KVM overlap.** You are already installing KVM/libvirt for Kali and malware VMs. Running both hypervisors at once can conflict, and I did not verify how current Workstation behaves alongside KVM on Fedora 45. If VMware gives you trouble, fall back to virt-manager (KVM) for everything.
 
+### Fixing the vmmon / vmnet module error
+
+The classic error is "Could not open /dev/vmmon" or "Kernel module vmmon not loaded". There are two usual causes. Find yours first:
+
+```bash
+mokutil --sb-state                 # is Secure Boot on?
+sudo vmware-modconfig --console --install-all   # does the build succeed?
+sudo modprobe vmmon                # does it load?
+dmesg | tail                       # "Key was rejected by service" = signing problem
+```
+
+> These steps come from Fedora community threads, not Fedora 45 testing. Verify paths on your system.
+
+**Cause A: Secure Boot rejects the unsigned modules** ("Key was rejected by service")
+
+```bash
+sudo dnf install -y akmods kernel-devel
+sudo kmodgenca -a
+sudo mokutil --import /etc/pki/akmods/certs/public_key.der   # set a one-time password
+sudo reboot                                                    # MOK screen: Enroll MOK, enter the password
+```
+
+After the reboot, build and sign the modules:
+
+```bash
+sudo vmware-modconfig --console --install-all
+for m in vmmon vmnet; do
+  sudo /usr/src/kernels/$(uname -r)/scripts/sign-file sha256 \
+    /etc/pki/akmods/private/private_key.priv \
+    /etc/pki/akmods/certs/public_key.der $(modinfo -n $m)
+done
+sudo modprobe vmmon vmnet
+```
+
+You must repeat the build-and-sign step after **every kernel update**.
+
+**Cause B: the build fails because the kernel is too new**
+
+Use community-patched sources that match your Workstation version. Pick the branch or tag for your exact version, and review the code before building it:
+
+```bash
+git clone https://github.com/mkubecek/vmware-host-modules.git
+cd vmware-host-modules
+git branch -a    # choose the workstation-<your version> branch
+git checkout workstation-<your version>
+make
+sudo make install
+sudo modprobe vmmon vmnet
+```
+
+Then sign the modules as in Cause A if Secure Boot is on. `gleb-kun/vmware-host-modules` is another fork that Fedora users have reported using.
+
 ## Cider (Apple Music)
 
 Try Flathub first:
