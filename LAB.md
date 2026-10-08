@@ -9,6 +9,20 @@ Companion to the [setup guide](README.md), [software guide](SOFTWARE.md), [extra
 - Isolation is strong but not perfect. VM escapes are rare, not impossible. For serious live-malware work, use a dedicated machine.
 - Snapshot before you do anything destructive.
 
+## Quick start: build script
+
+[`scripts/build-lab.sh`](scripts/build-lab.sh) automates sections 2 and 3 below (networks and the Kali VM). It was syntax-checked but **not run on Fedora**, so read it first.
+
+```bash
+./scripts/build-lab.sh networks                         # lab + lab-sealed networks
+./scripts/build-lab.sh kali ~/Downloads/kali-*.qcow2    # Kali VM from an image you downloaded and verified
+./scripts/build-lab.sh all  ~/Downloads/kali-*.qcow2    # both
+./scripts/build-lab.sh status                           # networks, VMs, interfaces, snapshots
+./scripts/build-lab.sh teardown                         # removes lab networks and the Kali VM
+```
+
+It does not download Kali for you, asks you to confirm you verified the checksum, and is safe to re-run (it skips what already exists).
+
 ## Layout
 
 ```
