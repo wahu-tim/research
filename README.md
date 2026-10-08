@@ -5,7 +5,7 @@ Quick setup guide for a single-OS, bare-metal Fedora Workstation install on an A
 > Fedora 45 final is targeted for ~Oct 20, 2026 (fallback Oct 27). The beta works but the final is preferable if you can wait.
 > Back up your data first. The install wipes the drive.
 
-See also: [SOFTWARE.md](SOFTWARE.md) for installing a terminal, VS Code, VMware Workstation, Cider and other apps.
+See also: [SOFTWARE.md](SOFTWARE.md) for installing a terminal, VS Code, VMware Workstation, Cider and other apps, and [EXTRAS.md](EXTRAS.md) for lab, resilience and customization ideas plus an explainer on COPR.
 
 ## Why Fedora over Ubuntu 26.10 for this use
 
