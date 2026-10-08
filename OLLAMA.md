@@ -27,6 +27,7 @@ rocminfo | grep -i gfx      # your card's gfx target, e.g. gfx1100
   - Keep the context length modest. A large context uses a lot of extra memory.
 - **CPU: Ryzen 9 7950X3D** (16 cores / 32 threads). Strong for the CPU side of offloading. Notes:
   - **RAM speed is the real limit** for offloaded layers, so enable the EXPO/XMP profile in BIOS. Check with `sudo dmidecode -t memory | grep -i speed`.
+  - **DDR5 on AM5 is dual-channel.** As a rough estimate, DDR5-6000 gives about 90 GB/s theoretical bandwidth, and offloaded tokens per second scale with that. 96 GB is most likely 2x48 GB, which runs at full speed. A 4-DIMM setup usually forces lower memory speeds on AM5, so if you have four sticks, expect slower offload. These figures are estimates, not benchmarks.
   - **Threads:** Ollama picks a thread count automatically. If CPU-offloaded speed looks poor, try setting `num_thread` to 16 (physical cores) in a Modelfile or request. I haven't verified this helps on this chip.
   - **Integrated GPU:** the 7950X3D has a small iGPU, so ROCm may see two GPUs. If Ollama picks the wrong one, pin the 7700 XT with `HIP_VISIBLE_DEVICES` (use the index shown by `rocminfo`). Add it in `sudo systemctl edit ollama` like the override in Troubleshooting.
   - **X3D scheduling:** only one of the two CCDs has the 3D V-Cache. Recent kernels include an AMD V-Cache preference setting (`amd_x3d_mode` in sysfs), which matters for games more than for LLM work. Leave the default unless you have a reason to change it.
