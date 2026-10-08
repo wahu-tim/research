@@ -84,6 +84,35 @@ ollama rm <model>             # free disk space
 - **API:** `curl http://localhost:11434/api/generate -d '{"model":"llama3.2","prompt":"hi"}'`
 - **Web UI (optional):** Open WebUI in a container, pointed at the local API.
 
+## What to use a 7B-14B model for
+
+General capabilities, not benchmarks on this hardware. Quality varies a lot between models, so test a few.
+
+**Good at**
+
+- **Coding help:** explaining code, small functions and scripts (bash, Python, PowerShell), regexes, SQL, unit tests, docstrings, commit messages, simple refactors, explaining errors and stack traces. A small code model also works for VS Code tab autocomplete through Continue.
+- **Text work:** summarizing documents, logs and articles, drafting and rewriting, extracting structured data (JSON) from messy text, classifying and tagging.
+- **Security research (local and private):** explaining disassembly, decompiled code and unfamiliar protocols, summarizing CVE write-ups and advisories, extracting IOCs from a report, drafting YARA or Sigma rules for you to review. Nothing leaves your machine, which is the main reason to run it locally.
+- **Everyday:** Q&A, brainstorming, rubber-ducking, translation, study help.
+
+**Weak at**
+
+- **Accuracy.** Small models hallucinate more than large hosted ones. They can invent function names, flags, CVE details and URLs. Verify anything you act on.
+- **Hard reasoning and long multi-step tasks:** big refactors, subtle bugs, architecture decisions.
+- **Large codebases.** Context windows are limited, and quality drops as you add more.
+- **Current events.** Only training-data knowledge.
+- **Security verdicts.** Don't trust one to declare code vulnerable or safe. Use it as a second pair of eyes alongside real tools.
+
+**Rough comparison:** useful for the everyday bulk of small tasks, with a clear gap to the biggest hosted models on hard problems. Your 96 GB of RAM lets you try larger MoE models for better quality when speed isn't critical.
+
+**Try first**
+
+1. A general chat model (7B-14B) for summaries and Q&A.
+2. A code model for VS Code through Continue.
+3. A small fast model for autocomplete.
+
+Run the same prompts on each and keep the ones that suit you.
+
 ## 6. Security (this is a research machine)
 
 - Ollama listens on **localhost only** by default. Keep it that way. If you set `OLLAMA_HOST=0.0.0.0` it is reachable from the network with no authentication.
