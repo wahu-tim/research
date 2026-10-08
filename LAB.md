@@ -1,6 +1,6 @@
 # Security Research Lab on Fedora (KVM / libvirt)
 
-Companion to the [setup guide](README.md), [software guide](SOFTWARE.md), [extras](EXTRAS.md) and [Ollama guide](OLLAMA.md). Steps come from general Fedora, libvirt and Kali knowledge, and **none were verified on Fedora 45**. Check package names, image names and download links against the vendors' current pages.
+Companion to the [setup guide](SETUP.md), [software guide](SOFTWARE.md), [extras](EXTRAS.md) and [Ollama guide](OLLAMA.md). Steps come from general Fedora, libvirt and Kali knowledge, and **none were verified on Fedora 45**. Check package names, image names and download links against the vendors' current pages.
 
 ## Ground rules
 

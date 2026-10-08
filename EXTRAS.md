@@ -1,6 +1,6 @@
 # Cool Things to Do with Your Fedora Install
 
-Companion to the [setup guide](README.md) and [software guide](SOFTWARE.md). These ideas come from general Fedora knowledge and were **not verified on Fedora 45**. Check package names and support first.
+Companion to the [setup guide](SETUP.md) and [software guide](SOFTWARE.md). These ideas come from general Fedora knowledge and were **not verified on Fedora 45**. Check package names and support first.
 
 ## Make it resilient
 

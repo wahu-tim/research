@@ -1,6 +1,6 @@
 # Software Installation Guide (Fedora 45)
 
-Companion to the [setup guide](README.md). Install methods are from web research on Fedora 41 to 44 sources and general knowledge. **None were verified on Fedora 45**, so check package names and repo support for your release.
+Companion to the [setup guide](SETUP.md). Install methods are from web research on Fedora 41 to 44 sources and general knowledge. **None were verified on Fedora 45**, so check package names and repo support for your release.
 
 Rule of thumb: native RPM or official vendor repo for system-level tools, Flatpak for desktop apps, containers for everything else.
 

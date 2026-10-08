@@ -1,6 +1,6 @@
 # Ollama on Fedora (AMD GPU)
 
-Companion to the [setup guide](README.md), [software guide](SOFTWARE.md) and [extras](EXTRAS.md). GPU details come from web research (Ollama's 2024 AMD announcement, Fedora forum threads, Phoronix, Red Hat docs). Ollama's AMD support changes quickly, and **none of this was verified on Fedora 45**. Check Ollama's current GPU docs (`docs/gpu` in the `ollama/ollama` repo) before relying on it.
+Companion to the [setup guide](SETUP.md), [software guide](SOFTWARE.md) and [extras](EXTRAS.md). GPU details come from web research (Ollama's 2024 AMD announcement, Fedora forum threads, Phoronix, Red Hat docs). Ollama's AMD support changes quickly, and **none of this was verified on Fedora 45**. Check Ollama's current GPU docs (`docs/gpu` in the `ollama/ollama` repo) before relying on it.
 
 ## 1. Check your GPU first
 

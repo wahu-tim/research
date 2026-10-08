@@ -1,156 +1,51 @@
-# Fedora 45 Setup: Dev Workstation + Security Research
+# Fedora 45 Workstation: Dev + Security Research
 
-Quick setup guide for a single-OS, bare-metal Fedora Workstation install on an AMD GPU machine, used for development and security research.
+A set of guides and scripts for a single-OS, bare-metal Fedora 45 install used for development and security research. Written for an AMD Ryzen 9 7950X3D, Radeon RX 7800 XT and 96 GB DDR5 machine, but most of it is hardware-neutral.
 
-> Fedora 45 final is targeted for ~Oct 20, 2026 (fallback Oct 27). The beta works but the final is preferable if you can wait.
-> Back up your data first. The install wipes the drive.
+> **Status:** written before the Fedora 45 install. Commands come from web research (Fedora 41 to 44 sources) and general knowledge, and **have not been verified on Fedora 45**. Scripts were syntax-checked only. Read before you run, and expect to fix some commands.
 
-See also: [SOFTWARE.md](SOFTWARE.md) for installing a terminal, VS Code, VMware Workstation, Cider and other apps, and [EXTRAS.md](EXTRAS.md) for lab, resilience and customization ideas plus an explainer on COPR, and [OLLAMA.md](OLLAMA.md) for running local LLMs on an AMD GPU, and [LAB.md](LAB.md) for building a KVM security research lab.
+## Start here (suggested order)
 
-## Why Fedora over Ubuntu 26.10 for this use
+| # | Step | Guide | Script |
+|---|---|---|---|
+| 1 | Install and base setup | [SETUP.md](SETUP.md) | [`scripts/post-install.sh`](scripts/post-install.sh) |
+| 2 | Install your apps (terminal, VS Code, VMware, Cider...) | [SOFTWARE.md](SOFTWARE.md) | |
+| 3 | Back it up before you tinker | [BACKUP.md](BACKUP.md) | [`scripts/restic-backup.sh`](scripts/restic-backup.sh) |
+| 4 | Harden it | [HARDENING.md](HARDENING.md) | [`scripts/audit.sh`](scripts/audit.sh) (read-only) |
+| 5 | Build the research lab | [LAB.md](LAB.md) | [`scripts/build-lab.sh`](scripts/build-lab.sh) |
+| 6 | Reverse engineering tools | [REVERSE-ENGINEERING.md](REVERSE-ENGINEERING.md) | |
+| 7 | Fake internet and traffic analysis | [NETWORK-ANALYSIS.md](NETWORK-ANALYSIS.md) | |
+| 8 | Local LLMs on the AMD GPU | [OLLAMA.md](OLLAMA.md) | |
+| 9 | Ideas, tweaks, COPR explainer | [EXTRAS.md](EXTRAS.md) | |
 
-- SELinux enforcing and rootless Podman by default make a safer host baseline.
-- Newer toolchains (GCC 16.2, Go 1.27, Python 3.15, glibc 2.44) help with building and fuzzing.
-- Flatpak/Flathub is first-class, with no Snap.
-- Btrfs snapshots make beta updates easy to roll back.
-- Ubuntu advantages: larger tutorial and tool ecosystem, and AMD's primary ROCm target.
-
-Caveats: kernel and Plasma versions for Fedora 45 came from a single secondary source. The oo7 secret store and kmscon console are new in this release, so test your credential flows early.
-
-## 1. Before installing
-
-- [ ] Update BIOS/UEFI
-- [ ] Download **Fedora Workstation** from fedoraproject.org and write it with Fedora Media Writer
-- [ ] Secure Boot: Fedora supports it, but on a personal machine running VMware you can leave it off. That skips module signing (see [SOFTWARE.md](SOFTWARE.md)).
-
-## 2. Install (Anaconda)
-
-- [ ] Use the whole disk with the default **Btrfs** layout
-- [ ] **Enable disk encryption (LUKS)** with a strong passphrase. It cannot be added cleanly later.
-- [ ] Skip Stratis
-
-## 3. First boot
+## Quick path
 
 ```bash
-sudo dnf upgrade --refresh -y
-sudo reboot
+git clone https://github.com/wahu-tim/research.git fedora-setup   # or the HuwaEnterprises/fedora-setup repo
+cd fedora-setup
+less scripts/post-install.sh          # read it first
+./scripts/post-install.sh --list      # see the steps
+./scripts/post-install.sh             # interactive, asks before each step
+./scripts/audit.sh                    # read-only hardening check
 ```
 
-Enable RPM Fusion and install multimedia codecs:
+## What's where
 
-```bash
-sudo dnf install -y https://mirrors.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://mirrors.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
-sudo dnf swap -y ffmpeg-free ffmpeg --allowerasing
-```
+- **Guides** are Markdown files at the repo root.
+- **Scripts** are in `scripts/`. They ask before changing things, refuse to run as root, and are safe to re-run where noted.
+- Each guide opens with a note on how much of it is verified.
 
-Check Flathub is enabled:
+## Decisions baked into these guides
 
-```bash
-flatpak remotes
-```
+- **Fedora 45 over Ubuntu 26.10** for newer toolchains, SELinux enforcing, rootless Podman and Flatpak-first apps.
+- **Secure Boot off** on this personal machine, because VMware's kernel modules are unsigned. This affects hardening, especially TPM disk unlock. See [HARDENING.md](HARDENING.md).
+- **Offensive tooling lives in VMs**, not on the host. The host stays clean.
+- **KVM and VMware don't run at the same time.**
 
-## 4. Snapshots (beta safety net)
+## Safety and scope
 
-```bash
-sudo dnf install -y snapper
-sudo snapper -c root create-config /
-sudo snapper -c root create -d "fresh install"
-```
+These guides are for **your own machines, your own lab and authorized testing**. Don't attack systems you don't own or lack written permission to test. Malware and vulnerable targets belong in the isolated lab only.
 
-Snapshot before big updates. `btrfs-assistant` or `snapper-gui` give a GUI.
+## Contributing to yourself
 
-## 5. Dev toolchain
-
-```bash
-sudo dnf install -y @development-tools gcc gcc-c++ clang gdb lldb git python3-pip golang rust cargo cmake
-sudo dnf install -y podman toolbox distrobox
-```
-
-Keep language runtimes and project dependencies in Toolbx/Distrobox containers so the host stays clean.
-
-## 6. Virtualization (Kali and malware labs)
-
-```bash
-sudo dnf install -y @virtualization
-sudo systemctl enable --now libvirtd
-sudo usermod -aG libvirt $USER
-```
-
-Log out and back in, then use virt-manager.
-
-- Build a **Kali or Parrot VM** for offensive tooling.
-- For untrusted samples, use a separate snapshotted VM with no shared folders and a host-only network.
-
-## 7. Security research tools (host)
-
-Keep the host lean:
-
-```bash
-sudo dnf install -y wireshark nmap radare2 gdb strace ltrace valgrind
-```
-
-For reverse engineering, install Ghidra (Flatpak or upstream) and pwndbg or GEF for GDB.
-
-Leave **SELinux enforcing** (`getenforce`). Troubleshoot denials with `ausearch -m avc` rather than disabling it.
-
-## 8. Hardening and basics
-
-- [ ] Firewall running: `sudo firewall-cmd --state`
-- [ ] Password manager set up
-- [ ] Test git credentials, SSH agent and VS Code sign-in (oo7 is new)
-- [ ] SSH key (and hardware key if used)
-
-## 9. AMD GPU
-
-Open Mesa drivers work out of the box. For compute or cracking, check ROCm support for your specific GPU before relying on it:
-
-```bash
-dnf search rocm
-```
-
-## 10. Final snapshot
-
-```bash
-sudo snapper -c root create -d "configured baseline"
-```
-
-## 11. Advanced tweaks (optional)
-
-> Commands here are from general Fedora knowledge and were **not verified on Fedora 45**. Check package and option names first (Fedora 41+ uses dnf5).
-
-**Skip:** `mitigations=off`, disabling SELinux, custom kernels. They cost the hardening that makes Fedora a good research host, for little gain.
-
-**System**
-
-- [ ] Faster DNF: add `max_parallel_downloads=10` and `defaultyes=True` to `/etc/dnf/dnf.conf`
-- [ ] Firmware: `sudo fwupdmgr refresh && sudo fwupdmgr update`
-- [ ] AMD hardware video decode (RPM Fusion): `sudo dnf swap mesa-va-drivers mesa-va-drivers-freeworld --allowerasing`
-- [ ] Confirm defaults rather than tuning them: zram swap (`zramctl`), Btrfs zstd compression (`mount | grep btrfs`), weekly fstrim
-
-**Shell and dev quality of life**
-
-```bash
-sudo dnf install -y zsh fish tmux neovim ripgrep fd-find bat fzf git-delta
-```
-
-- [ ] Add `starship` (prompt), `direnv` + `mise` (per-project tool versions)
-- [ ] One Distrobox container per project
-
-**Security hardening**
-
-- [ ] USBGuard to authorize USB devices
-- [ ] Automatic security-only updates (dnf5 `automatic` equivalent; confirm package name)
-- [ ] TPM2 disk unlock: `systemd-cryptenroll` (keep your recovery passphrase)
-- [ ] DNS over TLS via systemd-resolved
-- [ ] OpenSCAP scan to see where you stand (one blog reports a stock Fedora 44 cloud image at ~75/100 on CIS Level 1 Server)
-- [ ] Limit Flatpak permissions with Flatseal
-- [ ] Skip fapolicyd on a research workstation; it can break tooling
-
-## Sources
-
-- [ComputingForGeeks: Security hardening Fedora](https://computingforgeeks.com/security-hardening-fedora/)
-- [Fedora Discussion: Securing Fedora on a laptop](https://discussion.fedoraproject.org/t/securing-fedora-installation-on-my-laptop/196912)
-- [DebugPoint: Things to do after installing Fedora](https://www.debugpoint.com/10-things-to-do-fedora-37-after-install) (older, Fedora 37)
-- [Fedora Magazine: Announcing Fedora Linux 45 Beta](https://fedoramagazine.org/announcing-fedora-linux-45-beta/)
-- [Red Hat: Fedora 45 Beta now available](https://redhat.com/en/blog/fedora-45-beta-now-available)
-- [Phoronix: Ubuntu 26.10 Beta Released](https://www.phoronix.com/news/Ubuntu-26.10-Beta-Released)
+When you install Fedora 45, run each guide top to bottom and fix whatever breaks. Update the "not verified" notes as you confirm things.
