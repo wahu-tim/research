@@ -71,6 +71,8 @@ dmesg | tail                       # "Key was rejected by service" = signing pro
 
 > These steps come from Fedora community threads, not Fedora 45 testing. Verify paths on your system.
 
+> **Secure Boot off?** Skip Cause A entirely and go straight to Cause B. Your vmmon problem is the kernel being too new for the stock modules, so the patched sources are the fix. Re-run the `make` and `make install` after each kernel update.
+
 **Cause A: Secure Boot rejects the unsigned modules** ("Key was rejected by service")
 
 ```bash

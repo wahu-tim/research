@@ -21,7 +21,7 @@ Caveats: kernel and Plasma versions for Fedora 45 came from a single secondary s
 
 - [ ] Update BIOS/UEFI
 - [ ] Download **Fedora Workstation** from fedoraproject.org and write it with Fedora Media Writer
-- [ ] Leave Secure Boot on (Fedora supports it)
+- [ ] Secure Boot: Fedora supports it, but on a personal machine running VMware you can leave it off. That skips module signing (see [SOFTWARE.md](SOFTWARE.md)).
 
 ## 2. Install (Anaconda)
 
